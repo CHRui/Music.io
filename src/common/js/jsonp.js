@@ -14,11 +14,13 @@ export default function jsonp(url, data, option) {
     })
 }
 
-function param(data) {
+// 拼接参数到 url 上
+export function param(data) {
     let url = ''
     for (var k in data) {
         let value = data[k] !== undefined ? data[k] : ''
         url += `&${k}=${encodeURIComponent(value)}`
     }
+    // url.substring(1) 删除第一个 "&"
     return url ? url.substring(1) : ''
 }

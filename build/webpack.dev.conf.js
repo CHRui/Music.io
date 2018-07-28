@@ -11,9 +11,13 @@ const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
 //第一步
-const proxyMiddleware = require('http-proxy-middleware')
+// 单线程node.js代理中间件，用于连接，快速和浏览器同步
+// const proxyMiddleware = require('http-proxy-middleware')
+// ajax
 const axios = require('axios')
+// 基于nodejs平台，快速，开放，极简的web开发框架
 const express = require('express')
+// 创建node.js的express开发框架的实例
 const app = express()//请求server
 //var appData = require('../data.json')//加载本地数据文件
 //var seller = appData.seller//获取对应的本地数据
@@ -21,23 +25,25 @@ const app = express()//请求server
 //var ratings = appData.ratings
 var apiRoutes = express.Router()
 
-
-apiRoutes.get('/getDiscList', function (req, res) {
-  var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
-  axios.get(url, {
-    headers: {
-      referer: 'https://c.y.qq.com/',
-      host: 'c.y.qq.com'
-    },
-    params: req.query
-  }).then((response) => {
-    res.json(response.data)
-  }).catch((e) => {
-    console.log(e)
-  })
-})
-
 app.use('/api', apiRoutes)//通过路由请求数据
+
+// apiRoutes.get('/getDiscList', function (req, res) {
+//   // 歌单列表 API
+//   var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+//   axios.get(url, {
+//     headers: {
+//       referer: 'https://c.y.qq.com/',
+//       host: 'c.y.qq.com'
+//     },
+//     params: req.query // 请求的query
+//   }).then((response) => {
+//     // response 是 API 地址的返回，数据在 data 里
+//     res.json(response.data)
+//   }).catch((e) => {
+//     console.log(e)
+//   })
+// })
+
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
@@ -74,26 +80,25 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     },
 
     //第二步找到devServer,在里面添加
-    // before(app) {
-    //   app.get('/api/seller', (req, res) => {
-    //     res.json({
-    //       errno: 0,
-    //       data: seller
-    //     })//接口返回json数据，上面配置的数据seller就赋值给data请求后调用
-    //   }),
-    //     app.get('/api/goods', (req, res) => {
-    //       res.json({
-    //         errno: 0,
-    //         data: goods
-    //       })
-    //     }),
-    //     app.get('/api/ratings', (req, res) => {
-    //       res.json({
-    //         errno: 0,
-    //         data: ratings
-    //       })
-    //     })
-    // }
+    before(apiRoutes) {
+      apiRoutes.get('/api/getDiscList', function (req, res) {
+        // 歌单列表 API
+        const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query // 请求的query
+        }).then((response) => {
+          // response 是 API 地址的返回，数据在 data 里
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+      // app.use('/api',apiRoutes)
+    }
 
   },
   plugins: [
